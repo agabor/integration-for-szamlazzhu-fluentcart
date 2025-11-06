@@ -18,7 +18,6 @@ if (!\defined('ABSPATH')) {
     exit;
 }
 
-require __DIR__ . DIRECTORY_SEPARATOR .'autoload.php';
 require __DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'utils.php';
 require __DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'database.php';
 require __DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'api.php';
