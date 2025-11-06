@@ -67,8 +67,12 @@ function get_invoice_by_order_id($order_id) {
     global $wpdb;
     $table_name = $wpdb->prefix . 'szamlazz_invoices';
     
-    return $wpdb->get_row($wpdb->prepare(
-        "SELECT * FROM $table_name WHERE order_id = %d",
-        $order_id
-    ));
+    // Note: Table names cannot be parameterized in $wpdb->prepare()
+    // Using esc_sql() for extra safety, though $wpdb->prefix is already trusted
+    $query = sprintf(
+        "SELECT * FROM %s WHERE order_id = %%d",
+        esc_sql($table_name)
+    );
+    
+    return $wpdb->get_row($wpdb->prepare($query, $order_id));
 }
