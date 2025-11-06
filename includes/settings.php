@@ -31,7 +31,13 @@ if (!\defined('ABSPATH')) {
  * Register settings
  */
 \add_action('admin_init', function() {
-    \register_setting('szamlazz_hu_fluentcart_settings', 'szamlazz_hu_agent_api_key');
+    \register_setting('szamlazz_hu_fluentcart_settings', 'szamlazz_hu_agent_api_key', [
+        'type' => 'string',
+        'sanitize_callback' => function($value) {
+            // Trim whitespace and sanitize the API key
+            return sanitize_text_field(trim($value));
+        }
+    ]);
     \register_setting('szamlazz_hu_fluentcart_settings', 'szamlazz_hu_shipping_vat', [
         'type' => 'integer',
         'default' => 27,
