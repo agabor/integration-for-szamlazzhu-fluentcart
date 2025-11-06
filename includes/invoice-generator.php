@@ -178,7 +178,7 @@ function create_buyer($order, $agent, $vat_number = null) {
     // Get billing address
     $billing = $order->billing_address;
     if (!$billing) {
-        throw new \Exception("No billing address found for order $order_id");
+        throw new \Exception("No billing address found for order " . absint($order_id));
     }
     
     // Initialize with billing address defaults
@@ -262,7 +262,7 @@ function add_order_items($invoice, $order) {
     $items = OrderItem::where('order_id', $order_id)->get();
     
     if ($items->isEmpty()) {
-        throw new \Exception("No items found for order $order_id");
+        throw new \Exception("No items found for order " . absint($order_id));
     }
     
     // Get quantity unit from settings
