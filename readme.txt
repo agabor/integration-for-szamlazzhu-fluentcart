@@ -96,11 +96,6 @@ The interface language follows your WordPress language settings.
 * PDF caching and download functionality
 * Debug logging when WP_DEBUG is enabled
 
-== Upgrade Notice ==
-
-= 1.0.0 =
-Initial release of the plugin. Make sure to test in a staging environment before using in production.
-
 == Additional Information ==
 
 = Support =
