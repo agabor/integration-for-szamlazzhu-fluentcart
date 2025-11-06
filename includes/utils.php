@@ -72,3 +72,17 @@ function create_error($order_id, $code, $message, ...$args) {
     // Create and return WP_Error
     return new \WP_Error($code, $formatted_message);
 }
+
+/**
+ * Log an existing WP_Error object
+ * 
+ * @param int $order_id The order ID
+ * @param \WP_Error $error The WP_Error object to log
+ */
+function write_error_to_log($order_id, $error) {
+    $error_code = $error->get_error_code();
+    $error_message = $error->get_error_message();
+    
+    // Log the error
+    write_log($order_id, 'Error', $error_code, $error_message);
+}

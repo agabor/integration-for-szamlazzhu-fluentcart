@@ -350,11 +350,12 @@ function get_taxpayer_api($order_id, $api_key, $tax_number) {
 /**
  * Fetch invoice PDF from Számlázz.hu API using WordPress HTTP API
  * 
+ * @param int $order_id The order ID for logging
  * @param string $api_key Számlázz.hu API key
  * @param string $invoice_number Invoice number
  * @return array|\WP_Error Array with 'success' boolean and 'pdf_data' on success, or WP_Error on failure
  */
-function fetch_invoice_pdf($api_key, $invoice_number) {
+function fetch_invoice_pdf($order_id, $api_key, $invoice_number) {
     // Build XML request for invoice PDF
     $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><xmlszamlapdf xmlns="http://www.szamlazz.hu/xmlszamlapdf" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlapdf http://www.szamlazz.hu/szamla/docs/xsds/agentpdf/xmlszamlapdf.xsd"></xmlszamlapdf>');
     
@@ -391,6 +392,7 @@ function fetch_invoice_pdf($api_key, $invoice_number) {
     
     // Check for HTTP errors
     if (\is_wp_error($response)) {
+        write_error_to_log($order_id, $response);
         return $response;
     }
     
@@ -400,7 +402,7 @@ function fetch_invoice_pdf($api_key, $invoice_number) {
     
     // Check response code
     if ($response_code !== 200) {
-        return new \WP_Error('api_error', 'API returned error code: ' . $response_code);
+        return create_error($order_id, 'api_error', 'API returned error code', $response_code);
     }
     
     // Check if response is PDF or error message
@@ -413,6 +415,6 @@ function fetch_invoice_pdf($api_key, $invoice_number) {
         );
     } else {
         // Error response (usually XML)
-        return new \WP_Error('api_error', 'Failed to retrieve PDF: ' . substr($response_body, 0, 200));
+        return create_error($order_id, 'api_error', 'Failed to retrieve PDF', substr($response_body, 0, 200));
     }
 }
