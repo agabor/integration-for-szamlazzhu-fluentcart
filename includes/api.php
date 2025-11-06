@@ -387,13 +387,24 @@ function fetch_invoice_pdf($api_key, $invoice_number) {
     
     $xml_string = $xml->asXML();
     
+    // Create multipart/form-data request body
+    $boundary = wp_generate_password(24, false);
+    $body = '';
+    
+    // Add XML file as action-szamla_agent_pdf
+    $body .= "--{$boundary}\r\n";
+    $body .= 'Content-Disposition: form-data; name="action-szamla_agent_pdf"; filename="request.xml"' . "\r\n";
+    $body .= "Content-Type: application/xml\r\n\r\n";
+    $body .= $xml_string . "\r\n";
+    $body .= "--{$boundary}--\r\n";
+    
     // Send request to Számlázz.hu API using WordPress HTTP API
     $response = \wp_remote_post('https://www.szamlazz.hu/szamla/', array(
         'timeout' => 30,
         'headers' => array(
-            'Content-Type' => 'text/xml; charset=UTF-8',
+            'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
         ),
-        'body' => $xml_string,
+        'body' => $body,
     ));
     
     // Check for HTTP errors
