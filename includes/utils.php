@@ -120,6 +120,9 @@ function serve_pdf_download($file_path = null, $pdf_data = null, $filename = 'in
     \header('Content-Type: application/pdf');
     \header('Content-Disposition: attachment; filename="' . $filename . '"');
     \header('Content-Length: ' . $content_length);
+
+    // Raw file output for download
+    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
     echo $content;
     exit;
 }
