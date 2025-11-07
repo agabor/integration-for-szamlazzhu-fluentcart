@@ -57,6 +57,8 @@ function save_invoice($order_id, $result) {
         $invoice_id = null;
     }
     
+    // Direct database insert is necessary for custom table.
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
     return $wpdb->insert(
         $table_name,
         [
@@ -84,6 +86,8 @@ function get_invoice_by_order_id($order_id) {
         "SELECT * FROM %s WHERE order_id = %%d",
         esc_sql($table_name)
     );
-    
+    // Direct database query is necessary for custom table.
+    // Response is not cached because data is volatile
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     return $wpdb->get_row($wpdb->prepare($query, $order_id));
 }
