@@ -225,17 +225,8 @@ function get_pdf_path($invoice_number) {
                 $cached_pdf_path = get_pdf_path($invoice_record->invoice_number);
                 
                 if ($cached_pdf_path && \file_exists($cached_pdf_path)) {
-                    // Initialize WP_Filesystem
-                    require_once(ABSPATH . 'wp-admin/includes/file.php');
-                    WP_Filesystem();
-                    global $wp_filesystem;
-                    
                     // Serve from cache
-                    \header('Content-Type: application/pdf');
-                    \header('Content-Disposition: attachment; filename="' . \basename($cached_pdf_path) . '"');
-                    \header('Content-Length: ' . \filesize($cached_pdf_path));
-                    echo $wp_filesystem->get_contents($cached_pdf_path);
-                    exit;
+                    serve_pdf_download($cached_pdf_path);
                 }
                 
                 // PDF not in cache, fetch from API using WordPress HTTP API
@@ -259,11 +250,7 @@ function get_pdf_path($invoice_number) {
                     }
                     
                     // Serve PDF to user
-                    \header('Content-Type: application/pdf');
-                    \header('Content-Disposition: attachment; filename="' . $result['filename'] . '"');
-                    \header('Content-Length: ' . strlen($result['pdf_data']));
-                    echo $result['pdf_data'];
-                    exit;
+                    serve_pdf_download(null, $result['pdf_data'], $result['filename']);
                 }
             }
             

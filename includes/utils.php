@@ -86,3 +86,40 @@ function write_error_to_log($order_id, $error) {
     // Log the error
     write_log($order_id, 'Error', $error_code, $error_message);
 }
+
+/**
+ * Serve PDF file to browser
+ * Supports both file path and PDF data in memory
+ * 
+ * @param string|null $file_path Path to PDF file on disk (optional)
+ * @param string|null $pdf_data PDF data in memory (optional)
+ * @param string $filename Filename for download
+ * @return void Exits after serving the file
+ */
+function serve_pdf_download($file_path = null, $pdf_data = null, $filename = 'invoice.pdf') {
+    // Determine source and get content
+    if ($file_path && \file_exists($file_path)) {
+        // Read from file on disk
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+        WP_Filesystem();
+        global $wp_filesystem;
+        
+        $content = $wp_filesystem->get_contents($file_path);
+        $content_length = \filesize($file_path);
+        $filename = \basename($file_path);
+    } elseif ($pdf_data !== null) {
+        // Use data from memory
+        $content = $pdf_data;
+        $content_length = strlen($pdf_data);
+    } else {
+        // No valid source provided
+        return;
+    }
+    
+    // Set headers and serve PDF
+    \header('Content-Type: application/pdf');
+    \header('Content-Disposition: attachment; filename="' . $filename . '"');
+    \header('Content-Length: ' . $content_length);
+    echo $content;
+    exit;
+}
