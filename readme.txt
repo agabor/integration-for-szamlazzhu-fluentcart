@@ -14,6 +14,41 @@ Automatically generates invoices on Számlázz.hu for FluentCart orders with VAT
 
 Integration for Számlázz.hu and FluentCart is a WordPress plugin that seamlessly connects your FluentCart store with Számlázz.hu, automatically generating professional invoices when orders are paid.
 
+== External Services ==
+
+This plugin relies on the Számlázz.hu invoice generation service to create and manage invoices for FluentCart orders.
+
+**Service Information:**
+* **Service Provider:** Számlázz.hu (szamlazz.hu)
+* **Service Purpose:** The plugin connects to Számlázz.hu's Agent API to automatically generate invoices, fetch taxpayer information from the Hungarian Tax Authority (NAV), and retrieve generated invoice PDFs.
+
+**Data Transmission:**
+
+The plugin sends the following data to https://www.szamlazz.hu/szamla/ when:
+
+1. **Generating Invoices** (when an order is marked as paid):
+   * Your Számlázz.hu Agent API Key
+   * Order information: order number, dates, amounts, currency
+   * Buyer information: name, email, address, postal code, city, country
+   * Buyer's VAT/tax number (if provided)
+   * Product details: names, quantities, prices, VAT rates
+   * Shipping information: title, amount, VAT rate
+   * Invoice settings: language, type (paper/electronic)
+
+2. **Fetching Taxpayer Data** (when a Hungarian VAT number is provided):
+   * Your Számlázz.hu Agent API Key
+   * The taxpayer's 8-digit tax identification number (truncated from the full VAT number)
+
+3. **Downloading Invoice PDFs** (when users click to download invoices):
+   * Your Számlázz.hu Agent API Key
+   * The invoice number
+
+**Legal Information:**
+* Számlázz.hu Terms of Service: https://www.szamlazz.hu/aszf/
+* Számlázz.hu Privacy Policy: https://www.szamlazz.hu/adatvedelem/
+
+**Important:** By using this plugin, you agree to transmit your store and customer data to Számlázz.hu. Ensure you have proper consent from your customers and comply with applicable data protection regulations (GDPR, etc.).
+
 = Key Features =
 
 * **Automatic Invoice Generation** - Invoices are automatically created when orders are marked as paid
