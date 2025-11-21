@@ -53,6 +53,14 @@ for folder in "${FOLDERS_TO_COPY[@]}"; do
     fi
 done
 
+# Copy assets folder to $DEST_DIR/assets
+if [ -d "assets" ]; then
+    echo "Copying assets to: $DEST_DIR/assets"
+    cp -r "assets" "$DEST_DIR/"
+else
+    echo "Warning: Assets folder not found"
+fi
+
 echo "----------------------------------------"
 echo "Publishing complete!"
 echo "Files copied to: $DEST_DIR"
