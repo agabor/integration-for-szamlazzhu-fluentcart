@@ -3,7 +3,7 @@
  * Plugin Name: Integration for Számlázz.hu and FluentCart
  * Plugin URI: https://webshop.tech/integration-for-szamlazzhu-fluentcart/
  * Description: Generates invoices on Számlázz.hu for FluentCart orders
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Gábor Angyal
  * Author URI: https://webshop.tech
  * License: GPL v2 or later
@@ -137,6 +137,14 @@ function get_pdf_path($invoice_number) {
     
     return null;
 }
+
+function replace_eu_vat_header($content) {
+    return preg_replace(
+        '/<h4[^>]*id="eu-vat-heading"[^>]*>(.*?)<\/h4>/s',
+        '<h4 id="eu-vat-heading" class="fct_form_section_header_label">' . \esc_html(__('Hungarian VAT ID', 'integration-for-szamlazzhu-fluentcart')) . '</h4>',
+        $content
+    );
+}
 function handleVatValidation() {
     $cart = CartHelper::getCart();
 
@@ -212,7 +220,7 @@ function handleVatValidation() {
     \ob_start();
     (new EUVatRenderer(true))->render($cart);
     $euVatView = \ob_get_clean();
-    $euVatView = str_replace('EU VAT','Hungarian VAT ID', $euVatView);
+    $euVatView = replace_eu_vat_header($euVatView);
     
         wp_send_json([
             'success'   => true,
@@ -249,7 +257,7 @@ function renameEuVatHeader($fragments, $args)
     foreach ($fragments as $key => $fragment) {
         if (isset($fragment['selector']) && $fragment['selector'] === '[data-fluent-cart-checkout-page-tax-wrapper]') {
             if (isset($fragment['content'])) {
-                $fragments[$key]['content'] = str_replace('EU VAT', 'Hungarian VAT ID', $fragment['content']);
+                $fragments[$key]['content'] = replace_eu_vat_header($fragment['content']);
             }
         }
     }

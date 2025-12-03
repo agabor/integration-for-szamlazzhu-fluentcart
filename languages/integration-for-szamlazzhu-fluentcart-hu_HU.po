@@ -177,3 +177,7 @@ msgstr "Szállítási áfa alkalmazása az összes adómértékre"
 #: integration-for-szamlazzhu-fluentcart.php
 msgid "API Settings"
 msgstr "API beállítások"
+
+#: integration-for-szamlazzhu-fluentcart.php
+msgid "Hungarian VAT ID"
+msgstr "Adószám"
