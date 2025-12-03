@@ -27,6 +27,7 @@ require __DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'sett
 use FluentCart\App\Models\Order;
 use FluentCart\App\Helpers\CartHelper;
 use FluentCart\App\Services\Renderer\EUVatRenderer;
+use FluentCart\App\Services\Renderer\CartSummaryRender;
 
 function init_paths() {
     $suffix = get_option('szamlazz_hu_folder_suffix', '');
@@ -141,7 +142,7 @@ function handleVatValidation() {
 
     $checkoutData = $cart->checkout_data ?? [];
 
-    if ($checkoutData['tax_data']['tax_country'] !== 'HU')
+    if ($checkoutData['form_data']['billing_country'] !== 'HU')
         return;
 
     \nocache_headers();
@@ -163,39 +164,43 @@ function handleVatValidation() {
     $vatParts = explode('-', $vatNumber);
     $taxNumberToValidate = $vatParts[0];
     
-    $taxData = get_taxpayer_api(0, $api_key, $taxNumberToValidate);
+    $taxPayerData = get_taxpayer_api(0, $api_key, $taxNumberToValidate);
     
-    if (\is_wp_error($taxData)) {
-        \wp_send_json(['message' => $taxData->get_error_message()], 422);
+    if (\is_wp_error($taxPayerData)) {
+        \wp_send_json(['message' => $taxPayerData->get_error_message()], 422);
     }
     
-    if (empty($taxData['valid'])) {
+    if (empty($taxPayerData['valid'])) {
         \wp_send_json(['message' => __('VAT number is not valid!', 'fluent-cart')], 422);
     }
     
     
     
-    $companyInfo = $taxData['name'] ?? '';
-    if (!empty($taxData['address'])) {
+    $address = '';
+    if (!empty($taxPayerData['address'])) {
         $addressParts = [];
-        if (!empty($taxData['postcode'])) {
-            $addressParts[] = $taxData['postcode'];
+        if (!empty($taxPayerData['postcode'])) {
+            $addressParts[] = $taxPayerData['postcode'];
         }
-        if (!empty($taxData['city'])) {
-            $addressParts[] = $taxData['city'];
+        if (!empty($taxPayerData['city'])) {
+            $addressParts[] = $taxPayerData['city'];
         }
-        if (!empty($taxData['address'])) {
-            $addressParts[] = $taxData['address'];
+        if (!empty($taxPayerData['address'])) {
+            $addressParts[] = $taxPayerData['address'];
         }
         if (!empty($addressParts)) {
-            $companyInfo .= ' - ' . implode(', ', $addressParts);
+            $address = implode(', ', $addressParts);
         }
     }
     
-    $checkoutData['tax_data']['valid'] = true;
-    $checkoutData['tax_data']['vat_number'] = $taxData['vat_id'];
-    $checkoutData['tax_data']['name'] = $companyInfo;
-    
+    $taxData = $checkoutData['tax_data'];
+    $taxData['valid'] = true;
+    $taxData['country'] = 'HU';
+    $taxData['vat_number'] = $taxPayerData['vat_id'];
+    $taxData['name'] = $taxPayerData['name'] ?? '';
+    $taxData['address'] = $address;
+   
+    $checkoutData['tax_data'] = $taxData;
     $cart->checkout_data = $checkoutData;
     $cart->save();
     
