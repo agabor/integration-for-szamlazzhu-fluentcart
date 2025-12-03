@@ -212,6 +212,7 @@ function handleVatValidation() {
     \ob_start();
     (new EUVatRenderer(true))->render($cart);
     $euVatView = \ob_get_clean();
+    $euVatView = str_replace('EU VAT','Hungarian VAT ID', $euVatView);
     
         wp_send_json([
             'success'   => true,
