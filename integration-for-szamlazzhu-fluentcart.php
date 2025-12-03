@@ -137,23 +137,41 @@ function get_pdf_path($invoice_number) {
     return null;
 }
 function handleVatValidation() {
-    nocache_headers();
-    if (!isset($_REQUEST['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_REQUEST['_wpnonce'])), 'fluentcart')) {
-        wp_send_json(['message' => __('Security check failed', 'fluent-cart')], 403);
+    \nocache_headers();
+    if (!isset($_REQUEST['_wpnonce']) || !\wp_verify_nonce(\sanitize_text_field(\wp_unslash($_REQUEST['_wpnonce'])), 'fluentcart')) {
+        \wp_send_json(['message' => __('Security check failed', 'fluent-cart')], 403);
     }
-    $vatNumber = isset($_REQUEST['vat_number']) ? sanitize_text_field(wp_unslash($_REQUEST['vat_number'])) : '';
-    $taxData = $this->validateEuVatNumber($countryCode, $vatNumber);
-    if (is_wp_error($taxData)) {
-        wp_send_json(['message' => $taxData->get_error_message()], 422);
+    
+    $vatNumber = isset($_REQUEST['vat_number']) ? \sanitize_text_field(\wp_unslash($_REQUEST['vat_number'])) : '';
+    
+    if (empty($vatNumber)) {
+        \wp_send_json(['message' => __('VAT number is required', 'fluent-cart')], 422);
     }
-    if (!Arr::get($taxData, 'valid')) {
-        wp_send_json(['message' => __('VAT number is not valid!', 'fluent-cart')], 422);
+    
+    $api_key = \get_option('szamlazz_hu_agent_api_key', '');
+    if (empty($api_key)) {
+        \wp_send_json(['message' => __('Számlázz.hu API key is not configured', 'fluent-cart')], 422);
     }
+    
+    $vatParts = explode('-', $vatNumber);
+    $taxNumberToValidate = $vatParts[0];
+    
+    $taxData = get_taxpayer_api(0, $api_key, $taxNumberToValidate);
+    
+    if (\is_wp_error($taxData)) {
+        \wp_send_json(['message' => $taxData->get_error_message()], 422);
+    }
+    
+    if (empty($taxData['valid'])) {
+        \wp_send_json(['message' => __('VAT number is not valid!', 'fluent-cart')], 422);
+    }
+    
     $cart = CartHelper::getCart();
-    ob_start();
-    (new EUVatRenderer(true)))->render($cart);
-    $euVatView = ob_get_clean();
-    wp_send_json([
+    \ob_start();
+    (new EUVatRenderer(true))->render($cart);
+    $euVatView = \ob_get_clean();
+    
+    \wp_send_json([
         'success'   => true,
         'message'   => __('VAT has been applied successfully', 'fluent-cart'),
         'fragments' => [
